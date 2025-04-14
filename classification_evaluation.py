@@ -21,6 +21,15 @@ import csv
 NUM_CLASSES = len(my_bidict)
 
 #TODO: Begin of your code
+import torch
+class IntDict(dict):
+    def __getitem__(self, key):
+        if torch.is_tensor(key):
+            key = key.item()  # convert tensor to Python int
+        return super().__getitem__(int(key))
+# Now, redefine my_bidict as an identity mapping for the valid classes 0,1,2,3.
+my_bidict = IntDict({0: 0, 1: 1, 2: 2, 3: 3})
+
 def get_label(model, model_input, device):
     # For each image, evaluate the negative log likelihood under each candidate class,
     # and choose the label that minimizes the loss.
@@ -87,7 +96,7 @@ if __name__ == '__main__':
     #You should save your model to this path
     model_path = os.path.join(os.path.dirname(__file__), 'models/conditional_pixelcnn.pth')
     if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path, map_location=device))
         print('model parameters loaded')
     else:
         raise FileNotFoundError(f"Model file not found at {model_path}")
