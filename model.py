@@ -3,8 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from layers import *
 from torch.autograd import Variable
-
-# --- Unconditional Layers (unchanged) ---
+import os
 
 class PixelCNNLayer_up(nn.Module):
     def __init__(self, nr_resnet, nr_filters, resnet_nonlinearity):
@@ -40,8 +39,6 @@ class PixelCNNLayer_down(nn.Module):
             u = self.u_stream[i](u, a=u_list.pop())
             ul = self.ul_stream[i](ul, a=torch.cat((u, ul_list.pop()), 1))
         return u, ul
-
-# --- Conditional Layers for Powerful Conditioning ---
 
 class ConditionalPixelCNNLayer_up(nn.Module):
     def __init__(self, nr_resnet, nr_filters, resnet_nonlinearity, cond_dim):
@@ -164,8 +161,6 @@ class PixelCNN(nn.Module):
         assert len(u_list) == len(ul_list) == 0, "Mismatch in skip connection buffers"
         return x_out
 
-# --- ConditionalPixelCNN Implementation ---
-
 class ConditionalPixelCNN(nn.Module):
     def __init__(self, num_classes, embedding_dim=64, nr_resnet=5, nr_filters=80, nr_logistic_mix=10,
                  resnet_nonlinearity='concat_elu', input_channels=3):
@@ -179,11 +174,11 @@ class ConditionalPixelCNN(nn.Module):
         self.nr_logistic_mix = nr_logistic_mix
         self.embedding_dim = embedding_dim
         self.num_classes = num_classes
-        # Embedding and early fusion projections
+
         self.class_embedding = nn.Embedding(num_classes, embedding_dim)
         self.cond_project_u = nn.Linear(embedding_dim, nr_filters)
         self.cond_project_ul = nn.Linear(embedding_dim, nr_filters)
-        # Conditional up and down layers
+
         down_nr_resnet = [nr_resnet] + [nr_resnet + 1] * 2
         self.down_layers = nn.ModuleList([
             ConditionalPixelCNNLayer_down(down_nr_resnet[i], nr_filters, self.resnet_nonlinearity, cond_dim=embedding_dim)

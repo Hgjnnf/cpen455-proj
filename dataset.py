@@ -8,12 +8,10 @@ from bidict import bidict
 from tqdm import tqdm
 import pandas as pd
 
-# Rescaling functions
 rescaling = lambda x: (x - 0.5) * 2.
 rescaling_inv = lambda x: 0.5 * x + 0.5
 replicate_color_channel = lambda x: x.repeat(3, 1, 1)
 
-# Bidict mapping (if needed)
 my_bidict = bidict({'Class0': 0, 'Class1': 1, 'Class2': 2, 'Class3': 3})
 
 class CPEN455Dataset(Dataset):
@@ -22,7 +20,7 @@ class CPEN455Dataset(Dataset):
         self.transform = transform
         csv_path = os.path.join(self.root_dir, mode + '.csv')
         df = pd.read_csv(csv_path, header=None, names=['path', 'label'])
-        # Create list of tuples: (full_image_path, numeric label)
+
         self.samples = [(os.path.join(self.root_dir, path), int(label))
                         for path, label in df.itertuples(index=False)]
         

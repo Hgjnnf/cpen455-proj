@@ -101,7 +101,6 @@ class down_right_shifted_deconv2d(nn.Module):
         shp = list(x.size())
         return x[:, :, :shp[2]-self.filter_size[0]+1, :shp[3]-self.filter_size[1]+1]
 
-# Modified gated_resnet for conditional fusion
 class gated_resnet(nn.Module):
     def __init__(self, num_filters, conv_op, nonlinearity=concat_elu, skip_connection=0,
                  use_condition=False, cond_dim=None):
